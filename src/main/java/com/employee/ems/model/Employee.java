@@ -1,6 +1,6 @@
 package com.employee.ems.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name="employees")
@@ -9,11 +9,13 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name = "first_name")
+    @Column(name = "first_name", nullable = false, length = 80)
     private String firstName;
-    @Column(name = "last_name")
+
+    @Column(name = "last_name", nullable = false, length = 80)
     private String lastName;
-    @Column(name = "email_id")
+
+    @Column(name = "email_id", nullable = false, unique = true, length = 120)
     private String emailId;
 
     public Employee()
@@ -56,6 +58,12 @@ public class Employee {
     }
 
     public void setEmailId(String emailId) {
+        this.emailId = emailId;
+    }
+
+    public void update(String firstName, String lastName, String emailId) {
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.emailId = emailId;
     }
 }

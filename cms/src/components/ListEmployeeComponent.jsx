@@ -5,18 +5,30 @@ class ListEmployeeComponent extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            employees: []
+            employees: [],
+            search: "",
+            page: 0,
+            totalPages: 0
         }
         this.addEmployee = this.addEmployee.bind(this)
         this.editEmployee = this.editEmployee.bind(this)
         this.deleteEmployee=this.deleteEmployee.bind(this)
+        this.changeSearchHandler = this.changeSearchHandler.bind(this)
+        this.searchEmployees = this.searchEmployees.bind(this)
     }
 
-    //place to call rest api
     componentDidMount() {
-        EmployeeService.getEmployees()
+        this.loadEmployees();
+    }
+
+    loadEmployees(page = 0) {
+        EmployeeService.getEmployees(this.state.search, page)
             .then((res) =>
-                this.setState({employees: res.data})
+                this.setState({
+                    employees: res.data.content || [],
+                    page: res.data.number || 0,
+                    totalPages: res.data.totalPages || 0
+                })
             )
     }
 
@@ -38,6 +50,15 @@ class ListEmployeeComponent extends Component {
 
     }
 
+    changeSearchHandler(event) {
+        this.setState({search: event.target.value})
+    }
+
+    searchEmployees(event) {
+        event.preventDefault();
+        this.loadEmployees(0);
+    }
+
 
     render() {
         return (
@@ -48,6 +69,19 @@ class ListEmployeeComponent extends Component {
                 <div className="row">
                     <button style={{marginBottom:"20px"}} className="btn btn-secondary border-primary " onClick={this.addEmployee}>Add Employee</button>
                 </div>
+                <form className="row" onSubmit={this.searchEmployees}>
+                    <div className="input-group mb-3">
+                        <input
+                            className="form-control"
+                            placeholder="Search by name or email"
+                            value={this.state.search}
+                            onChange={this.changeSearchHandler}
+                        />
+                        <div className="input-group-append">
+                            <button className="btn btn-outline-secondary" type="submit">Search</button>
+                        </div>
+                    </div>
+                </form>
                 <div className="row">
                     <table className="table table-striped table-bordered">
 
@@ -84,6 +118,23 @@ class ListEmployeeComponent extends Component {
                         </tbody>
                     </table>
 
+                </div>
+                <div className="row justify-content-between">
+                    <button
+                        className="btn btn-outline-secondary"
+                        disabled={this.state.page === 0}
+                        onClick={() => this.loadEmployees(this.state.page - 1)}
+                    >
+                        Previous
+                    </button>
+                    <span>Page {this.state.page + 1} of {Math.max(this.state.totalPages, 1)}</span>
+                    <button
+                        className="btn btn-outline-secondary"
+                        disabled={this.state.page + 1 >= this.state.totalPages}
+                        onClick={() => this.loadEmployees(this.state.page + 1)}
+                    >
+                        Next
+                    </button>
                 </div>
             </div>
         );
